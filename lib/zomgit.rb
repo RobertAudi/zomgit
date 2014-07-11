@@ -1,0 +1,1 @@
+require "zomgit/version.rb"
