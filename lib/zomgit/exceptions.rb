@@ -16,7 +16,6 @@ module Zomgit
     #
     class TooManyChangesError < BaseError; end
     class NoChangesError < BaseError; end
-    class InvalidFilterError < BaseError; end
 
     #
     # Add command exceptions

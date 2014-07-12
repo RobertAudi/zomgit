@@ -7,8 +7,10 @@ end
 require "gli"
 require "rainbow/ext/string"
 
+
+%w(helpers concerns).each { |f| Dir.glob(File.join(File.dirname(File.realpath(__FILE__)), "zomgit", f, "*.rb")).each { |ff| require ff } }
+
 require_relative File.join(".", "zomgit", "version")
-require_relative File.join(".", "zomgit", "helpers")
 require_relative File.join(".", "zomgit", "exceptions")
 require_relative File.join(".", "zomgit", "commands")
 
