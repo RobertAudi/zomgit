@@ -17,4 +17,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency "bundler", "~> 1.6"
 
   s.add_runtime_dependency "gli", "2.11.0"
+  s.add_runtime_dependency "rainbow", "2.0.0"
 end

@@ -1,8 +1,12 @@
 #!/usr/bin/env ruby
 
-require_relative "../lib/zomgit"
+require_relative File.join("..", "lib", "zomgit")
 
 Signal.trap("SIGINT") do
   puts "\nTerminating"
   exit 1
 end
+
+zomgit = Zomgit::CLI
+
+exit zomgit.run(ARGV)
