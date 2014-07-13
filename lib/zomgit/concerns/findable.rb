@@ -41,9 +41,9 @@ module Zomgit
         end
       end
 
-      def find(arguments, options = [])
+      def search(arguments, options = [])
         greedy = !!options[:greedy]
-        clean = !!options[:clean]
+        clean = !!options[:refine]
 
         case options[:filter].to_sym
         when :all

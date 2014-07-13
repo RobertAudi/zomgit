@@ -25,6 +25,11 @@ module Zomgit
     class NoChangesError < BaseError; end
 
     #
+    # Find command exceptions
+    #
+    class MissingQueryError < BaseError; end
+
+    #
     # Add command exceptions
     #
     class FileOrDirectoryNotFoundError < BaseError; end
