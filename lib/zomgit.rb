@@ -49,6 +49,10 @@ module Zomgit
           cmd::FLAGS.each { |names, params| c.flag(*names, params) }
         end
 
+        if cmd.const_defined?("SWITCHES")
+          cmd::SWITCHES.each { |names, params| c.switch(*names, params) }
+        end
+
         c.action do |global_options, options, args|
           the_command = cmd.new(args, options)
           puts the_command.send(Zomgit::Commands::EXECUTION_METHOD)
