@@ -12,6 +12,13 @@ module Zomgit
     class InvalidOptionError < BaseError; end
 
     #
+    # Indices exceptions
+    #
+    class NoIndexError < BaseError; end
+    class InvalidIndexError < BaseError; end
+    class InvalidIndexRangeError < BaseError; end
+
+    #
     # Status command exceptions
     #
     class TooManyChangesError < BaseError; end

@@ -64,6 +64,40 @@ module Zomgit
         cmds.each { |c| files << `command git #{c}`.split("\n") }
         files.flatten!
 
+        indices = arguments.map { |a| a if a =~ /\A[1-9]+(?:\.{2}[0-9]+)?\Z/ }.compact
+
+        unless indices.empty?
+          index = Zomgit::Persistor.instance.index
+
+          if index.empty?
+            raise Zomgit::Exceptions::NoIndexError.new("No index found")
+          end
+
+          arguments -= indices
+
+          indices.map! do |i|
+            if i.include?("..")
+              head, tail = i.split("..").map(&:to_i)
+
+              if head > tail || head > files.count || tail > index.count
+                raise Zomgit::Exceptions::InvalidIndexRangeError.new("Invalid index range: #{[head, tail].join("..")}")
+              end
+
+              index[Range.new(head - 1, tail - 1)]
+            else
+              ii = i.to_i
+
+              unless ii > 0 && ii <= index.count
+                raise Zomgit::Exceptions::InvalidIndexError.new("Invalid index: #{i}")
+              end
+
+              index[ii - 1]
+            end
+          end
+
+          indices.flatten!
+        end
+
         if clean
           found = files
 
@@ -78,6 +112,10 @@ module Zomgit
           end
 
           found = found.flatten.uniq
+        end
+
+        unless indices.empty?
+          found = (found + indices).uniq
         end
 
         found

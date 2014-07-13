@@ -4,7 +4,7 @@ module Zomgit
       include Zomgit::Helpers::FileHelper
       include Zomgit::Helpers::RainbowHelper
 
-      attr_reader :filter
+      attr_reader :filter, :files
 
       DESCRIPTION = "Show the status of the git repo"
       FLAGS = {
@@ -42,6 +42,7 @@ module Zomgit
         super arguments, options
 
         @filter = options[:filter].to_sym if options[:filter]
+        @index = 0
       end
 
       def show
@@ -85,9 +86,11 @@ module Zomgit
             if changes[self.filter].empty?
               raise Zomgit::Exceptions::NoChangesError.new("No changes matching this filter")
             else
+              self.index! changes[self.filter]
               output << self.output_for(self.filter, changes[self.filter])
             end
           else
+            self.index! changes
             GROUPS.keys.each { |g| output << self.output_for(g, changes[g]) unless changes[g].empty? }
           end
         end
@@ -217,6 +220,15 @@ module Zomgit
           output << send("#{group}_group_color", "#     ")
           output << send("#{change[:color]}_color", change[:message])
           output << ": "
+
+          index = self.files.index(change[:file]) + 1
+
+          padding = ""
+          padding << " " if changes.count >= 10 && index < 10
+          padding << " " if changes.count >= 100 && index < 100
+
+          output << "[#{padding}#{index}] "
+
           output << send("#{group}_group_color", relative_file)
           output << " #{submodule_change}\n"
         end
@@ -224,6 +236,12 @@ module Zomgit
         output << send("#{group}_group_color", "#")
         output << "\n"
         output
+      end
+
+      def index!(changes, persist: true)
+        @files = changes.values.flatten.map { |c| c[:file] }
+
+        Zomgit::Persistor.instance.cache_index(@files) if persist
       end
     end
   end

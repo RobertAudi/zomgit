@@ -23,6 +23,7 @@ module Zomgit
 
         system "command git add --all #{files.join(" ")}"
 
+        Zomgit::Persistor.instance.clean_index_cache!
         Zomgit::Commands::StatusCommand.new.send(Zomgit::Commands::EXECUTION_METHOD)
       end
       alias_method Zomgit::Commands::EXECUTION_METHOD, :add
