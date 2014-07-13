@@ -121,7 +121,7 @@ module Zomgit
       end
 
       def has_modules?
-        @has_modules ||= File.exists?(File.join(@project_root, ".gitmodules"))
+        @has_modules ||= File.exists?(File.join(Zomgit::project_root, ".gitmodules"))
       end
 
       def has_dirty_module?
@@ -156,12 +156,11 @@ module Zomgit
           untracked: []
         }
 
-        modules = self.has_modules? ? File.read(File.join(@project_root, ".gitmodules")) : ""
+        modules = self.has_modules? ? File.read(File.join(Zomgit::project_root, ".gitmodules")) : ""
 
         status.each do |raw_change|
           change = { left: raw_change[0], right: raw_change[1], file: raw_change[3..-1] }
 
-          # if has_modules? && File.read(File.join(@project_root, ".gitmodules")).include?(change[:file])
           if !self.has_dirty_module? && modules.include?(change[:file])
             self.has_dirty_module!
           end
@@ -204,7 +203,7 @@ module Zomgit
         output << "\n"
 
         changes.each do |change|
-          relative_file = relative_path(Dir.pwd, File.join(@project_root, change[:file]))
+          relative_file = relative_path(Dir.pwd, File.join(Zomgit::project_root, change[:file]))
 
           submodule_change = nil
           if self.has_dirty_module?

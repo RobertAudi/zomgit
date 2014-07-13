@@ -15,11 +15,29 @@ require_relative File.join(".", "zomgit", "exceptions")
 require_relative File.join(".", "zomgit", "commands")
 
 module Zomgit
+  def project_root
+    @project_root
+  end
+  module_function :project_root
+
+  def project_root=(value)
+    if value.empty?
+      raise Zomgit::Exceptions::NoGitRepoFoundError.new("Directory is not a git repository (#{Dir.getwd})")
+    end
+
+    @project_root = value
+  end
+  module_function :project_root=
+
   class CLI
     extend GLI::App
 
     program_desc  "git wrapper for the Z shell"
     version       Zomgit::VERSION
+
+    pre do |global_options,command,options,args|
+      Zomgit::project_root = File.directory?(File.join(Dir.getwd, ".git")) ? Dir.getwd : `\git rev-parse --show-toplevel 2> /dev/null`.strip
+    end
 
     Zomgit::Commands::LIST.each do |cname|
       cmd = Zomgit::Commands.const_get("#{cname.capitalize}Command")
