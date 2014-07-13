@@ -75,7 +75,7 @@ module Zomgit
         output << dark_color(" | ")
 
         if status.empty?
-          output << modified_color("No changes (working directory clean)\n")
+          output << modified_color("No changes (working directory clean)")
         else
           output << self.stats_for(status).gsub(/(\d+)/, modified_color('\1'))
           output << dark_color("\n#\n")
