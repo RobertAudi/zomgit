@@ -26,8 +26,7 @@ module Zomgit
         %i(filter f) => {
           arg_name: "filter",
           desc: "Limit the search to a specific state (tracked, untracked, etc)",
-          must_match: %w(all untracked tracked unstaged modified),
-          default_value: :all
+          must_match: %w(all untracked tracked unstaged staged modified)
         }
       }
 
@@ -36,7 +35,7 @@ module Zomgit
           raise Zomgit::Exceptions::MissingQueryError.new("You need to supply a search query!")
         end
 
-        files = self.search(arguments, options)
+        files = self.search(self.arguments, self.options)
 
         if files.empty?
           raise Zomgit::Exceptions::FileOrDirectoryNotFoundError.new("Nothing found matching your query")
@@ -45,7 +44,6 @@ module Zomgit
         files.join("\n")
       end
       alias_method Zomgit::Commands::EXECUTION_METHOD, :find
-
     end
   end
 end

@@ -10,6 +10,7 @@ module Zomgit
     #
     class NoGitRepoFoundError < BaseError; end
     class InvalidOptionError < BaseError; end
+    class NoChangesError < BaseError; end
 
     #
     # Indices exceptions
@@ -22,7 +23,6 @@ module Zomgit
     # Status command exceptions
     #
     class TooManyChangesError < BaseError; end
-    class NoChangesError < BaseError; end
 
     #
     # Find command exceptions

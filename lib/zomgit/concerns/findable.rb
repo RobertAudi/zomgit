@@ -42,10 +42,11 @@ module Zomgit
       end
 
       def search(arguments, options = [])
-        greedy = !!options[:greedy]
+        greedy = !!options[:greedy] && !!!options[:G]
         clean = !!options[:refine]
+        files = Array.new
 
-        case options[:filter].to_sym
+        case options[:filter].to_s.to_sym
         when :all
           cmds = ["ls-files --others --cached --exclude-standard"]
         when :untracked
@@ -54,68 +55,77 @@ module Zomgit
           cmds = ["ls-files"]
         when :unstaged
           cmds = ["ls-files --others --exclude-standard", "diff --name-only"]
+        when :staged
+          cmds = ["diff --name-only --cached"]
         when :modified
           cmds = ["diff --name-only"]
         else
           cmds = ["ls-files --others --cached --exclude-standard"]
         end
 
-        files = Array.new
         cmds.each { |c| files << `command git #{c}`.split("\n") }
         files.flatten!
 
-        indices = arguments.map { |a| a if a =~ /\A[1-9]+(?:\.{2}[0-9]+)?\Z/ }.compact
-
-        unless indices.empty?
-          index = Zomgit::Persistor.instance.index
-
-          if index.empty?
-            raise Zomgit::Exceptions::NoIndexError.new("No index found")
-          end
-
-          arguments -= indices
-
-          indices.map! do |i|
-            if i.include?("..")
-              head, tail = i.split("..").map(&:to_i)
-
-              if head > tail || head > files.count || tail > index.count
-                raise Zomgit::Exceptions::InvalidIndexRangeError.new("Invalid index range: #{[head, tail].join("..")}")
-              end
-
-              index[Range.new(head - 1, tail - 1)]
-            else
-              ii = i.to_i
-
-              unless ii > 0 && ii <= index.count
-                raise Zomgit::Exceptions::InvalidIndexError.new("Invalid index: #{i}")
-              end
-
-              index[ii - 1]
-            end
-          end
-
-          indices.flatten!
+        if files.count == 0
+          raise Zomgit::Exceptions::NoChangesError.new("No changes matching this filter")
         end
 
-        if clean
+        if arguments.count == 1 && arguments.first == "."
           found = files
-
-          arguments.each do |arg|
-            found = Finder.fuzzy_find(found, arg, greedy: greedy)
-          end
         else
-          found = Array.new
+          indices = arguments.map { |a| a if a =~ /\A[1-9]+(?:\.{2}[0-9]+)?\Z/ }.compact
 
-          arguments.each do |arg|
-            found << Finder.fuzzy_find(files, arg, greedy: greedy)
+          unless indices.empty?
+            index = Zomgit::Persistor.instance.index
+
+            if index.empty?
+              raise Zomgit::Exceptions::NoIndexError.new("No index found")
+            end
+
+            arguments -= indices
+
+            indices.map! do |i|
+              if i.include?("..")
+                head, tail = i.split("..").map(&:to_i)
+
+                if head > tail || head > files.count || tail > index.count
+                  raise Zomgit::Exceptions::InvalidIndexRangeError.new("Invalid index range: #{[head, tail].join("..")}")
+                end
+
+                index[Range.new(head - 1, tail - 1)]
+              else
+                ii = i.to_i
+
+                unless ii > 0 && ii <= index.count
+                  raise Zomgit::Exceptions::InvalidIndexError.new("Invalid index: #{i}")
+                end
+
+                index[ii - 1]
+              end
+            end
+
+            indices.flatten!
           end
 
-          found = found.flatten.uniq
-        end
+          if clean
+            found = files
 
-        unless indices.empty?
-          found = (found + indices).uniq
+            arguments.each do |arg|
+              found = Finder.fuzzy_find(found, arg, greedy: greedy)
+            end
+          else
+            found = Array.new
+
+            arguments.each do |arg|
+              found << Finder.fuzzy_find(files, arg, greedy: greedy)
+            end
+
+            found = found.flatten.uniq
+          end
+
+          unless indices.empty?
+            found = (found + indices).uniq
+          end
         end
 
         found
