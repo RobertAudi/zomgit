@@ -1,0 +1,3 @@
+gps() {
+  command git push ${@}
+}
