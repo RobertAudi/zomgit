@@ -40,6 +40,14 @@ module Zomgit
       Zomgit::project_root = File.directory?(File.join(Dir.getwd, ".git")) ? Dir.getwd : `\git rev-parse --show-toplevel 2> /dev/null`.strip
     end
 
+    command :config do |c|
+      desc "Show the location of the zomgit file to source"
+
+      c.action do |global_options, options, args|
+        puts File.expand_path(File.join("..", "share", "zomgit.zsh"))
+      end
+    end
+
     Zomgit::Commands::LIST.each do |cname|
       cmd = Zomgit::Commands.const_get("#{cname.capitalize}Command")
 
