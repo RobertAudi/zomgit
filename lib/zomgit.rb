@@ -44,7 +44,7 @@ module Zomgit
       desc "Show the location of the zomgit file to source"
 
       c.action do |global_options, options, args|
-        puts File.expand_path(File.join("..", "share", "zomgit.zsh"))
+        puts File.expand_path(File.join(File.dirname(__FILE__), "..", "share", "zomgit.zsh"))
       end
     end
 
